@@ -1,0 +1,23 @@
+```{r}
+# load data
+load("opt.rda")
+# load necessary packages
+library("tidyverse")
+library("ggplot2")
+```
+
+```{r}
+# create a low birth weight variable defined as <2500 g
+head(opt$Birthweight)
+lbw <- ifelse(opt$Birthweight < 2500, "1", "0")
+opt <- opt %>%
+  mutate(lbw = lbw)
+head(opt$lbw)
+```
+
+```{r}
+# variables of interest
+var <- c("PID", "Group", "Age", "Black", "White", "Asian", "Hypertension", "Diabetes", "BMI", "BL.Cig.Day", "Any.live.ptb.sb.sp.ab.in.ab", "BL.Calc.I ")
+df <- opt %>%
+  filter()
+```
