@@ -22,9 +22,3 @@ df <- opt %>%
   filter()
 ```
 
-```{r}
-# variables of interest
-var <- c("PID", "Group", "Age", "Black", "White", "Asian", "Hypertension", "Diabetes", "BMI", "BL.Cig.Day", "Any.live.ptb.sb.sp.ab.in.ab", "BL.Calc.I ")
-df <- opt %>%
-  filter()
-```
