@@ -27,8 +27,8 @@ df<-df%>%
                      ifelse(is.na(Tx.comp.),"Withdrew",
                             ifelse(Tx.comp.%in% "Yes","Completed",
                                    ifelse(Tx.comp.%in%"No","Not completed","Unknown")))))
-#####
-df_vicky <- opt %>%
-  mutate(Drug.Add = as.numeric(Drug.Add)) %>%
-  filter(!Drug.Add == "1")
+#Hypertension
+df <- df %>%
+  mutate(Hypertension = as.numeric(Hypertension), 
+         Hypertension = ifelse(Hypertension == 2, "1", "0")) 
 
