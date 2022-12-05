@@ -18,7 +18,7 @@ head(opt$lbw)
 ```{r}
 # variables of interest
 df <- opt %>%
-  dplyr::select(PID, Group, Age, Black, White, Asian, Hypertension, Diabetes, BMI, BL.Cig.Day, Any.live.ptb.sb.sp.ab.in.ab, BL.Calc.I,Pre.eclamp,V5.DNA, Use.Tob,Drug.Add,BMI,Diabetes, lbw,Tx.comp.,Tx.time,Birthweight)%>%
+  dplyr::select(PID, Group, Age, Black, White, Asian, Hypertension, Diabetes, BMI, BL.Cig.Day, Any.live.ptb.sb.sp.ab.in.ab, BL.Calc.I,Pre.eclamp, V5.DNA, Use.Tob, Drug.Add, BMI, Diabetes, lbw, Tx.comp., Tx.time, Birthweight)%>%
   filter(!is.na(Birthweight))
 ```
 #####
