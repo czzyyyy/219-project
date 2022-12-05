@@ -22,3 +22,7 @@ df <- opt %>%
   filter()
 ```
 
+df_vicky <- opt %>%
+  mutate(Drug.Add = as.numeric(Drug.Add)) %>%
+  filter(!Drug.Add == "1")
+
