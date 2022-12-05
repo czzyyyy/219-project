@@ -21,6 +21,12 @@ df <- opt %>%
   dplyr::select(PID, Group, Age, Black, White, Asian, Hypertension, Diabetes, BMI, BL.Cig.Day, Any.live.ptb.sb.sp.ab.in.ab, BL.Calc.I,Pre.eclamp, V5.DNA, Use.Tob, Drug.Add, BMI, Diabetes, lbw, Tx.comp., Tx.time, Birthweight)%>%
   filter(!is.na(Birthweight))
 ```
+# A variable that combines information from 'Group' and 'Tx.Comp.'
+df<-df%>%
+  mutate(Tx = ifelse(Group%in%"C","Control", 
+                     ifelse(is.na(Tx.comp.),"Withdrew",
+                            ifelse(Tx.comp.%in% "Yes","Completed",
+                                   ifelse(Tx.comp.%in%"No","Not completed","Unknown")))))
 #####
 df_vicky <- opt %>%
   mutate(Drug.Add = as.numeric(Drug.Add)) %>%
