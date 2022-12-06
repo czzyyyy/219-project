@@ -9,7 +9,7 @@ library("ggplot2")
 ```{r}
 # create a low birth weight variable defined as <2500 g
 head(opt$Birthweight)
-lbw <- ifelse(opt$Birthweight < 2500, "1", "0")
+lbw <- as.factor(ifelse(opt$Birthweight < 2500, "1", "0"))
 opt <- opt %>%
   mutate(lbw = lbw)
 head(opt$lbw)
@@ -18,7 +18,7 @@ head(opt$lbw)
 ```{r}
 # variables of interest
 df <- opt %>%
-  dplyr::select(PID, Group, Age, Black, White, Asian, Hypertension, Diabetes, BMI, BL.Cig.Day, Any.live.ptb.sb.sp.ab.in.ab, BL.Calc.I,Pre.eclamp, V5.DNA, Use.Tob, Drug.Add, BMI, Diabetes, lbw, Tx.comp., Tx.time, Birthweight)%>%
+  dplyr::select(PID, Group, Age, Black, White, Asian, Hypertension, Diabetes, BMI, BL.Cig.Day, Any.live.ptb.sb.sp.ab.in.ab, BL.Calc.I,Pre.eclamp, BL.DNA, Use.Tob, Drug.Add, BMI, Diabetes, lbw, Tx.comp., Tx.time, Birthweight)%>%
   filter(!is.na(Birthweight))
 ```
 # A variable that combines information from 'Group' and 'Tx.Comp.'
@@ -32,3 +32,51 @@ df <- df %>%
   mutate(Hypertension = as.numeric(Hypertension), 
          Hypertension = ifelse(Hypertension == 2, "1", "0")) 
 
+#Pre-eclampsia
+#Among those with pre-eclampsia, the frequency of low birthweight is 32.69%, much higher than those without pre-eclampsia (8.51%). 
+#Therefore, pre-eclampsia may be a helpful predictor of low birthweight
+df_preeclamp<-df%>%filter(!Pre.eclamp%in%"   ")%>%
+  group_by(Pre.eclamp)%>%
+  summarize(low_bw = sum(lbw=='1'),
+            normal = sum(lbw=='0'))%>%
+  mutate(freq = low_bw/(low_bw+normal)*100)
+df_preeclamp
+df%>%filter(!Pre.eclamp%in%"   ")%>%
+  ggplot(aes(x=Pre.eclamp, fill=lbw))+
+         geom_bar()+
+  guides(fill = guide_legend(title = "Birthweight"))+
+    scale_fill_discrete(labels = c("Normal","<2500g"))
+
+
+#machine learning models
+
+```{r}
+library(tidyverse)
+library(splitstackshape)
+library(caret)
+library(e1071)
+library(pROC)
+```
+
+```{r}
+set.seed(1)
+train_index <- createDataPartition(df$lbw, times = 1, p = 0.7, list = FALSE) #percent training and percent testing could be changed
+head(train_index)
+
+train_set <- df[train_index, ]
+test_set <- df[-train_index, ]
+head(train_set)
+
+dim(train_set)
+dim(test_set)
+```
+
+#try logistic regression model
+#Need to add more variables for predictions
+```{r}
+glm_fit <- train_set %>% glm(lbw ~ Pre.eclamp+Tx, data=., family = "binomial")
+p_hat_logit <- predict(glm_fit, newdata = test_set, type="response")
+y_hat_logit <- ifelse(p_hat_logit > 0.25, "1", "0")
+confusionMatrix(data = as.factor(y_hat_logit), 
+                reference = test_set$lbw, positive = "1")
+```
