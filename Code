@@ -23,24 +23,47 @@ df <- opt %>%
   dplyr::select(PID, Group, Age, Black, White, Asian, Hypertension, Diabetes, BMI, BL.Cig.Day, Any.live.ptb.sb.sp.ab.in.ab, BL.Calc.I,Pre.eclamp, BL.DNA, Use.Tob, Drug.Add, BMI, Diabetes, lbw, Tx.comp., Tx.time, Birthweight)%>%
   filter(!is.na(Birthweight))
 ```
+```{r}
 # A variable that combines information from 'Group' and 'Tx.Comp.'
 df<-df%>%
   mutate(Tx = ifelse(Group%in%"C","Control", 
                      ifelse(is.na(Tx.comp.),"Withdrew",
                             ifelse(Tx.comp.%in% "Yes","Completed",
                                    ifelse(Tx.comp.%in%"No","Not completed","Unknown")))))
+```
+
+```{r}
 # clean data for smoking
 df <- df %>%
   mutate(Cig = ifelse(Use.Tob == "Yes", BL.Cig.Day, "0")) %>%
   mutate(Cig = as.numeric(Cig))
 
 table(df$Use.Tob, df$BL.Cig.Day)                          
-                                   
+```  
+```{r}
 # Hypertension
 df <- df %>%
   mutate(Hypertension = as.numeric(Hypertension), 
          Hypertension = ifelse(Hypertension == 2, "1", "0")) 
+```  
 
+```{r}
+#Between Treatment and Control group
+#There are only a slight difference between percentage of low birthweight in treatment (9.85%) vs. control (10.67%) group.
+df_group<-df%>%group_by(Group)%>%
+  summarize(low_bw = sum(lbw=='1'),
+            normal = sum(lbw=='0'))%>%
+  mutate(freq = low_bw/(low_bw+normal)*100)
+df_group
+
+df_group%>%ggplot(aes(x=Group, y=freq, fill=as.factor(Group)))+
+         geom_bar(stat = "identity", width=0.5)+
+  xlab("Treatment Group") +
+  ylab("Percent of low birth weight") +
+  theme(legend.position="")+
+  geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white")
+``` 
+```{r}
 #Pre-eclampsia
 #Among those with pre-eclampsia, the frequency of low birthweight is 32.69%, much higher than those without pre-eclampsia (8.51%). 
 #Therefore, pre-eclampsia may be a helpful predictor of low birthweight
@@ -50,12 +73,13 @@ df_preeclamp <- df%>%filter(!Pre.eclamp%in%"   ")%>%
             normal = sum(lbw=='0'))%>%
   mutate(freq = low_bw/(low_bw+normal)*100)
 df_preeclamp
-df%>%filter(!Pre.eclamp%in%"   ")%>%
-  ggplot(aes(x=Pre.eclamp, fill=lbw))+
-         geom_bar()+
-  guides(fill = guide_legend(title = "Birthweight"))+
-    scale_fill_discrete(labels = c("Normal","<2500g"))
-
+df_preeclamp %>% ggplot(aes(x=Pre.eclamp, y=freq, fill=as.factor(Pre.eclamp)))+
+         geom_bar(stat = "identity", width=0.5)+
+  xlab("Presence of Pre-eclampsia") +
+  ylab("Percent of low birth weight") +
+  theme(legend.position="")+
+  geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white")
+``` 
 ```{r}
 # relationship between race and birth weight
 race_lbw <- df %>%
