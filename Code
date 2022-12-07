@@ -80,6 +80,7 @@ df_preeclamp %>% ggplot(aes(x=Pre.eclamp, y=freq, fill=as.factor(Pre.eclamp)))+
   theme(legend.position="")+
   geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white")
 ``` 
+
 ```{r}
 # relationship between race and birth weight
 race_lbw <- df %>%
@@ -87,7 +88,7 @@ race_lbw <- df %>%
   pivot_longer("Black":"Asian", names_to = "Race", values_to = "Value_R") %>%
   filter(Value_R == "Yes") %>%
   group_by(Race) %>%
-  summarize (Percentage = sum(lbw == "1")/ sum (number == "1") * 100)
+  summarize (Percentage = sum(lbw == "1")/ sum (lbw == "1"|lbw == "0") * 100)
 race_lbw
   
 race_lbw %>%
@@ -95,18 +96,17 @@ race_lbw %>%
   geom_bar(stat = "identity", width=0.5) +
   xlab("Race") +
   ylab("Percent of low birth weight") +
-  theme(legend.position="")
+  theme(legend.position="") +
+   geom_text(aes(label= paste0(round(Percentage,2),"%")), position=position_dodge(width=0.9), vjust=1.5, color="white")
 ```
-
 The prevalence of low birth weight is highest among Black population (12.36%) while no Asian mothers have infants with low birth weight. From the data, we can see that race is associated with presence of low birth weight.
 
 ```{r}
 # relationship between pregnancy loss history and birth weight
 preg_lbw <- df %>%
-  mutate (number = 1) %>%
   filter(!is.na(Any.live.ptb.sb.sp.ab.in.ab)) %>%
   group_by(Any.live.ptb.sb.sp.ab.in.ab) %>%
-  summarize (Percentage = sum(lbw == "1")/ sum (number == "1") * 100)
+  summarize (Percentage = sum(lbw == "1")/ sum (lbw == "1"|lbw == "0") * 100)
 preg_lbw
  
 preg_lbw %>%
@@ -114,18 +114,18 @@ preg_lbw %>%
   geom_bar(stat = "identity", width=0.5) +
   xlab("Pregnancy loss history") +
   ylab("Percent of low birth weight") +
-  theme(legend.position="")
+  theme(legend.position="") +
+  geom_text(aes(label= paste0(round(Percentage,2),"%")), position=position_dodge(width=0.9), vjust=1.5, color="white")
 ```
 Prevalence of low birth weight is lower among mothers without a previous pregnancy loss history (6.88%) compared to mothers with a previous pregnancy loss history (14.07%).
 
 ```{r}
 # relationship between smoking and low birth weight
 smok_lbw <- df %>%
-  mutate (number = 1) %>%
   mutate(Use.Tob = as.character(Use.Tob)) %>%
   filter(!Use.Tob %in% "   ") %>%
   group_by(Use.Tob) %>%
-  summarize (Percentage = sum(lbw == "1")/ sum (number == "1") * 100)
+  summarize (Percentage = sum(lbw == "1")/ sum (lbw == "1"|lbw == "0") * 100)
 smok_lbw
 
 smok_lbw %>%
@@ -133,14 +133,14 @@ smok_lbw %>%
   geom_bar(stat = "identity", width=0.5) +
   xlab("Smoking Status") +
   ylab("Percent of low birth weight") +
-  theme(legend.position="")
+  theme(legend.position="") +
+  geom_text(aes(label= paste0(round(Percentage,2),"%")), position=position_dodge(width=0.9), vjust=1.5, color="white")
 
 # relationship between number of cigarettes and low birth weight 
 cig_lbw <- df %>% 
-  mutate (number = 1) %>%
   filter(Cig > 0) %>%
   group_by(Cig) %>%
-  summarize (Percentage = sum(lbw == "1")/ sum (number == "1") * 100)
+  summarize (Percentage = sum(lbw == "1")/ sum (lbw == "1"|lbw == "0") * 100)
 cig_lbw
  
 cig_lbw %>%
