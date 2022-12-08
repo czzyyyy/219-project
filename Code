@@ -16,6 +16,7 @@ opt <- opt %>%
   mutate(lbw = lbw)
 head(opt$lbw)
 ```
+_We selected several variables of interests to explore individually to see if they are associated with low birth weight.(Cite literature?)_
 
 ```{r}
 # variables of interest
@@ -23,6 +24,9 @@ df <- opt %>%
   dplyr::select(PID, Group, Age, Black, White, Asian, Hypertension, Diabetes, BMI, BL.Cig.Day, Any.live.ptb.sb.sp.ab.in.ab, BL.Calc.I,Pre.eclamp, BL.DNA, Use.Tob, Drug.Add, BMI, Diabetes, lbw, Tx.comp., Tx.time, Birthweight)%>%
   filter(!is.na(Birthweight))
 ```
+
+_We wanted to explore if we should use as-treated or per-protocol method for treatment. However, after seeing that the separating by treatment completion leads to reduced sample sizes, we decided to still go with per-protocol assignment of treatment groups ("Group" variable)._
+
 ```{r}
 # A variable that combines information from 'Group' and 'Tx.Comp.'
 df<-df%>%
@@ -61,13 +65,13 @@ df_htn%>%ggplot(aes(x=Hypertension, y=freq, fill=as.factor(Hypertension)))+
 
 
 ```  
-
 ```{r}
 #Between Treatment and Control group
 #There are only a slight difference between percentage of low birthweight in treatment (9.85%) vs. control (10.67%) group.
 df_group<-df%>%group_by(Group)%>%
   summarize(low_bw = sum(lbw=='1'),
-            normal = sum(lbw=='0'))%>%
+            normal = sum(lbw=='0'),
+            n=n())%>%
   mutate(freq = low_bw/(low_bw+normal)*100)
 df_group
 
@@ -76,25 +80,32 @@ df_group%>%ggplot(aes(x=Group, y=freq, fill=as.factor(Group)))+
   xlab("Treatment Group") +
   ylab("Percent of low birth weight") +
   theme(legend.position="")+
-  geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white")
-``` 
+  geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white")+
+  geom_text(aes(label= paste0("n=",low_bw,"/",n)),position=position_dodge(width=0.9), vjust=3,color="white")+
+  scale_x_discrete(labels=c("C" = "Control", "T" = "Periodontal Treatment"))+
+  ggtitle("Percent of low birth weight by treatment group")
+```
 ```{r}
 #Pre-eclampsia
-#Among those with pre-eclampsia, the frequency of low birthweight is 32.69%, much higher than those without pre-eclampsia (8.51%). 
-#Therefore, pre-eclampsia may be a helpful predictor of low birthweight
+
 df_preeclamp <- df%>%filter(!Pre.eclamp%in%"   ")%>%
-  group_by(Pre.eclamp)%>%
+  group_by(Pre.eclamp, Group)%>%
   summarize(low_bw = sum(lbw=='1'),
-            normal = sum(lbw=='0'))%>%
+            normal = sum(lbw=='0'),
+            n=n())%>%
   mutate(freq = low_bw/(low_bw+normal)*100)
 df_preeclamp
-df_preeclamp %>% ggplot(aes(x=Pre.eclamp, y=freq, fill=as.factor(Pre.eclamp)))+
-         geom_bar(stat = "identity", width=0.5)+
+df_preeclamp %>% ggplot(aes(fill=Group, x=Pre.eclamp, y=freq))+
+         geom_bar(position="dodge",stat = "identity")+
   xlab("Presence of Pre-eclampsia") +
   ylab("Percent of low birth weight") +
-  theme(legend.position="")+
-  geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white")
+  geom_text(aes(label=paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white") +
+  geom_text(aes(label=paste0("n=",low_bw,"/",n)),position=position_dodge(width=0.9), vjust=3,color="white")+
+  scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment"))+
+  ggtitle("Percent of low birth weight by pre-eclampsia and treatment")
 ``` 
+
+_Among those with pre-eclampsia, the frequency of low birthweight much higher than those without pre-eclampsia. Therefore, pre-eclampsia may be a helpful predictor of low birthweight. When separated by treatment, there seems to be some changes in percent of low birth weight among control vs. treatment group. However, the direction is differential among those with and without pre-eclampsia._
 
 ```{r}
 # relationship between race and birth weight
