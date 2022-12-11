@@ -396,7 +396,7 @@ test_set<-test_set%>%mutate(lbw=as.factor(lbw))
 confusionMatrix(data = as.factor(y_hat_logit), 
                 reference = test_set$lbw, positive = "1")
 ```
-The prevalence of low birthweight is only xxx.     
+The prevalence of low birthweight is only xxx. The accuracy is xxx while the balanced accuracy is only xxx. The sensitivity (xxx) and the specificity (xxx) are highly imbalanced.     
        
 ##Knn model with k = 5
 ```{r}
