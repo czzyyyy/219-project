@@ -310,31 +310,34 @@ library(pROC)
 ```
 
 ```{r}
+# choose training set
 set.seed(1)
-train_index <- createDataPartition(df$lbw, times = 1, p = 0.7, list = FALSE) #percent training and percent testing could be changed
-head(train_index)
 
-train_set <- df[train_index, ]
-test_set <- df[-train_index, ]
-head(train_set)
+x <- stratified(df, "lbw", 0.5, keep.rownames = TRUE)
+train_set <- x %>% dplyr::select(-rn)
+train_index <- as.numeric(x$rn)
+test_set <- x[-train_index,]
 
 dim(train_set)
 dim(test_set)
+
 ```
 
 #try logistic regression model
-#Need to add more variables for predictions
 ```{r}
-glm_fit <- train_set %>% glm(lbw ~ Pre.eclamp+Tx, data=., family = "binomial")
+glm_fit <- train_set %>% glm(as.factor(lbw) ~ Pre.eclamp + Tx+Hypertension+Diabetes+Black+White+Asian+Use.Tob+Cig+Age, data=., family = "binomial")
 p_hat_logit <- predict(glm_fit, newdata = test_set, type="response")
 y_hat_logit <- ifelse(p_hat_logit > 0.25, "1", "0")
+test_set<-test_set%>%mutate(lbw=as.factor(lbw))
 confusionMatrix(data = as.factor(y_hat_logit), 
                 reference = test_set$lbw, positive = "1")
+
+```
                 
 #try knn model with k = 5
 ```{r}
 #fit model
-knn_fit_5 <- knn3(lbw ~ Pre.eclamp + Tx, data = train_set, k = 5)
+knn_fit_5 <- knn3(lbw ~ Pre.eclamp + Tx+Hypertension+Diabetes+Black+White+Asian+Use.Tob+Cig+Age, data = train_set, k = 5)
 
 #prediction
 p_hat_knn5 <- predict(knn_fit_5, newdata = test_set)[,2]
@@ -346,6 +349,19 @@ y_hat_knn5 <- ifelse(p_hat_knn5 > 0.25, "1", "0")
 confusionMatrix(data = as.factor(y_hat_knn5), 
                 reference = as.factor(test_set$lbw), positive = "1")
 
+```
+
+```{r}
+#try nb model
+nb_fit <- train_set %>% 
+  naiveBayes(as.factor(lbw) ~ Pre.eclamp + Tx+Hypertension+Diabetes+Black+White+Asian+Use.Tob+Cig+Age, data = .)
+
+p_hat_nb <- predict(nb_fit, test_set, type = "raw")[,2]
+y_hat_nb <- ifelse(p_hat_nb > 0.25, "1", "0") 
+
+#confusion Matrix
+confusionMatrix(data = as.factor(y_hat_nb), 
+                reference = as.factor(test_set$lbw), positive = "1")
 ```
 
 #ROC
@@ -361,8 +377,12 @@ roc_glm <- roc(test_set$lbw, pred_glm)
 pred_knn5 <- predict(knn_fit_5, newdata = test_set)[,2]
 roc_knn5 <- roc(test_set$lbw, pred_knn5)
 
+#NB
+roc_nb <-roc(test_set$lbw, p_hat_nb)
+
+
 #ROC
-ggroc(list("LogisticRegression" = roc_glm , "kNN, k = 5" = roc_knn5)) +
+ggroc(list("LogisticRegression" = roc_glm , "kNN, k = 5" = roc_knn5,"Naive Bayes" =roc_nb) )+
   theme(legend.title = element_blank()) +
   geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color = "black", linetype = "dashed") +
   xlab("Specificity") +
@@ -374,5 +394,5 @@ ggroc(list("LogisticRegression" = roc_glm , "kNN, k = 5" = roc_knn5)) +
 ```{r}
 auc(roc_glm)
 auc(roc_knn5)
-
+auc(roc_nb)
 ```
