@@ -48,20 +48,21 @@ df_htn <- df %>%
   mutate(Hypertension = as.numeric(Hypertension),
          Hypertension = ifelse(Hypertension == "2", "1", "0")) 
 
-df_htn<-df_htn%>%group_by(Hypertension)%>%
+df_htn<-df_htn%>%group_by(Hypertension, Group)%>%
   summarize(low_bw = sum(lbw=='1'),
-            normal = sum(lbw=='0'))%>%
+            normal = sum(lbw=='0'),
+            n=n())%>%
   mutate(freq = low_bw/(low_bw+normal)*100)
 
 
-df_htn%>%ggplot(aes(x=Hypertension, y=freq, fill=as.factor(Hypertension)))+
-  geom_bar(stat = "identity", width=0.5)+
+df_htn%>%ggplot(aes(x=Hypertension, y=freq, fill = Group))+
+  geom_bar(position="dodge",stat = "identity") +
   xlab("Hypertension") +
   ylab("Percent of low birth weight") +
-  theme(legend.position="")+
   geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white") +
-  geom_text(aes(label= paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white") +
+  geom_text(aes(label= paste0("n=",low_bw,"/",n)),position=position_dodge(width=0.9), vjust=3,color="white") +
   scale_x_discrete(labels=c("0" = "No (n=784)", "1" = "Yes (n=25)")) +
+  scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment")) +
   ggtitle("Percent of low birth weight by maternal hypertension status")
 ```  
 
