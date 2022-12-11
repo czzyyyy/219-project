@@ -123,7 +123,7 @@ age %>%
 
 Maternal age is an important risk factor for pregnancy-related complications and birth outcomes. When separated by treatment, we can observe a clear increasing trend in giving birth to infants with low birth weight as maternal age increases. 
 
-##Race
+## Race
 ```{r}
 # relationship between race and birth weight
 race_lbw <- df %>%
