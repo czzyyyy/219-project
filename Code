@@ -59,7 +59,10 @@ df_htn%>%ggplot(aes(x=Hypertension, y=freq, fill=as.factor(Hypertension)))+
   xlab("Hypertension") +
   ylab("Percent of low birth weight") +
   theme(legend.position="")+
-  geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white")
+  geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white") +
+  geom_text(aes(label= paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white") +
+  scale_x_discrete(labels=c("0" = "No (n=784)", "1" = "Yes (n=25)")) +
+  ggtitle("Percent of low birth weight by maternal hypertension status")
 ```  
 
 ```{r}
