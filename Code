@@ -87,7 +87,7 @@ dm %>% ggplot(aes(Diabetes, freq, fill=Group))+
   xlab("Diabetes") +
   ylab("Percent of low birth weight") +
   geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white") +
-  geom_text(aes(label= paste0("n=",low_bw,"/",n)),position=position_dodge(width=0.9), vjust=3,color="white") +
+  geom_text(aes(label= paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white") +
   scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment"))+
   scale_x_discrete(labels=c("No" = "No (n=786)", "Yes" = "Yes (n=23)")) +
   ggtitle("Percent of low birth weight by diabetes and treatment")
@@ -124,7 +124,7 @@ BMI %>%
   xlab("BMI") +
   ylab("Percent of low birth weight") +
   geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white") +
-  geom_text(aes(label= paste0("n=",low_bw,"/",n)),position=position_dodge(width=0.9), vjust=3,color="white") +
+  geom_text(aes(label= paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white") +
   scale_x_discrete(labels=c("underweight" = "Underweight (n=26)", "normal" = "Normal (n=248)", "overweight" = "Overweight (n=228)", "obese" = "Obese (n=235)"))+
   scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment"))+
   ggtitle("Percent of low birth weight by BMI and treatment")
