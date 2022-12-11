@@ -76,7 +76,7 @@ df_group%>%ggplot(aes(x=Tx, y=freq, fill=as.factor(Tx)))+
   theme(legend.position="")+
   geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white")+
   geom_text(aes(label= paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white")+
-  scale_x_discrete(labels=c("Completed Periodontal therapy (N=184)", "Control (N=403)","Some therapy (N=222)"))
+  scale_x_discrete(labels=c("Completed Periodontal therapy (N=184)", "Control (N=403)","Some therapy (N=222)"))+
   ggtitle("Percent of low birth weight by treatment completion")
 ```
 
