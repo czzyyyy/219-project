@@ -63,6 +63,31 @@ df_htn%>%ggplot(aes(x=Hypertension, y=freq, fill=as.factor(Hypertension)))+
 ```  
 
 ```{r}
+#Diabetes
+df %>%
+  group_by(Diabetes) %>%
+  summarize(Yes = sum(Diabetes=='Yes'),
+            No = sum(Diabetes=='No'), 
+            n=n())
+
+dm <- df %>% 
+  filter(!Diabetes %in% "") %>%
+  group_by(Diabetes) %>%
+  summarize(low_bw = sum(lbw=='1'),
+            normal = sum(lbw=='0')) %>%
+  mutate(freq = low_bw/(low_bw+normal)*100)
+
+dm %>% ggplot(aes(Diabetes, freq, fill=as.factor(Diabetes)))+
+  geom_bar(stat = "identity", width=0.5)+
+  xlab("Diabetes") +
+  ylab("Percent of low birth weight") +
+  theme(legend.position="")+
+  geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white") +
+  geom_text(aes(label= paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white") +
+  scale_x_discrete(labels=c("No" = "No (n=786)", "Yes" = "Yes (n=23)"))
+```
+
+```{r}
 #Between Treatment and Control group
 df_group<-df%>%group_by(Group)%>%
   summarize(low_bw = sum(lbw=='1'),
