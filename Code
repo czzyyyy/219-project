@@ -48,8 +48,8 @@ df_group%>%ggplot(aes(x=Group, y=freq, fill=as.factor(Group)))+
   ylab("Percent of low birth weight") +
   theme(legend.position="")+
   geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white")+
-  geom_text(aes(label= paste0("n=",low_bw,"/",n)),position=position_dodge(width=0.9), vjust=3,color="white")+
-  scale_x_discrete(labels=c("C" = "Control", "T" = "Periodontal Treatment"))+
+  geom_text(aes(label= paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white")+
+  scale_x_discrete(labels=c("C" = "Control(N=403)", "T" = "Periodontal Treatment(N=406)"))+
   ggtitle("Percent of low birth weight by treatment group")
 ```
 _There are only a slight difference between percentage of low birthweight in treatment (9.85%) vs. control (10.67%) group._
@@ -70,7 +70,7 @@ df_group%>%ggplot(aes(x=Tx, y=freq, fill=as.factor(Tx)))+
   theme(legend.position="")+
   geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white")+
   geom_text(aes(label= paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white")+
-  scale_x_discrete(labels=c("Control" = "Control (n=403)", "Completed therapy" = "Completed Periodontal therapy (n=184)", "Some therapy"="Some therapy (n=222)"))+
+  scale_x_discrete(labels=c("Control (N=403)","Completed Periodontal therapy (N=184)", "Some therapy (N=222)"))+
   ggtitle("Percent of low birth weight by treatment completion")
 ```
 
@@ -191,7 +191,7 @@ df_preeclamp %>% ggplot(aes(fill=Group, x=Pre.eclamp, y=freq))+
   xlab("Presence of Pre-eclampsia") +
   ylab("Percent of low birth weight") +
   geom_text(aes(label=paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white") +
-  geom_text(aes(label=paste0("n=",low_bw,"/",n)),position=position_dodge(width=0.9), vjust=3,color="white")+
+  geom_text(aes(label=paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white")+
   scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment"))+
   ggtitle("Percent of low birth weight by pre-eclampsia and treatment")
 ``` 
