@@ -15,7 +15,9 @@ opt <- opt %>%
   mutate(lbw = ifelse(Birthweight < 2500, "1", "0"))
 head(opt$lbw)
 ```
-_We selected several variables of interests to explore individually to see if they are associated with low birth weight.(Cite literature?)_
+
+## Predictors Selection
+We selected several variables of interests to explore individually to see if they are associated with low birth weight.(Cite literature?)
 
 ```{r}
 # variables of interest
