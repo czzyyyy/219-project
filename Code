@@ -17,7 +17,7 @@ head(opt$lbw)
 ```
 
 ## Predictors Selection
-We selected several variables of interests to explore individually to see if they are associated with low birth weight.(Cite literature?)
+Through reviewing the documentation, we selected several variables of interests to explore individually to see if they are associated with low birth weight.(Cite literature?)
 
 ```{r}
 # variables of interest
@@ -25,6 +25,8 @@ df <- opt %>%
   dplyr::select(PID, Group, Age, Black, White, Asian, Hypertension, Diabetes, BMI, BL.Cig.Day, Any.live.ptb.sb.sp.ab.in.ab, BL.Calc.I,Pre.eclamp, BL.DNA, Use.Tob, Drug.Add, BMI, Diabetes, lbw, Tx.comp., Tx.time, Birthweight)%>%
   filter(!is.na(Birthweight))
 ```
+
+We only remove columns that contain missing values for birth weight since it's the outcome of interest. Many participants hav missing values for different variables. To avoid losing too much data, we decided to filter out those missing values separately in each data visualization for specific variable.
 
 ```{r}
 # A variable that combines information from 'Group' and 'Tx.Comp.'
@@ -35,8 +37,9 @@ df<-df%>%
                                    ifelse(Tx.comp.%in%"No","Not completed","Unknown")))))
 ```
 
+# Treatment Effect
 ```{r}
-#Between Treatment and Control group
+# Between Treatment and Control group
 df_group<-df%>%group_by(Group)%>%
   summarize(low_bw = sum(lbw=='1'),
             normal = sum(lbw=='0'),
@@ -54,8 +57,9 @@ df_group%>%ggplot(aes(x=Group, y=freq, fill=as.factor(Group)))+
   scale_x_discrete(labels=c("C" = "Control(N=403)", "T" = "Periodontal Treatment(N=406)"))+
   ggtitle("Percent of low birth weight by treatment group")
 ```
-_There are only a slight difference between percentage of low birthweight in treatment (9.85%) vs. control (10.67%) group._
+There are only a slight difference between percentage of low birthweight in treatment (9.85%) vs. control (10.67%) group.
 
+# Treatment Completion
 ```{r}
 #Percentage of low birth weight by treatment completion
 df_group<-df%>%group_by(Tx)%>%
@@ -76,20 +80,11 @@ df_group%>%ggplot(aes(x=Tx, y=freq, fill=as.factor(Tx)))+
   ggtitle("Percent of low birth weight by treatment completion")
 ```
 
-_For the treatment group, some have completed therapy and some have unknown completion (some therapy). When separating by treatment completion status, there are also only modest difference between percentage of low birth weight in those completed treatment (8.15%) vs. control (10.67%) vs. some therapy(11.26%) group._
+For the treatment group, some have completed therapy and some have unknown completion (some therapy). When separating by treatment completion status, there are also only modest difference between percentage of low birth weight in those completed treatment (8.15%) vs. control (10.67%) vs. some therapy(11.26%) group.
 
-
+# Age
 ```{r}
-# clean data for smoking
-df <- df %>%
-  mutate(Cig = ifelse(Use.Tob == "Yes", BL.Cig.Day, "0")) %>%
-  mutate(Cig = as.numeric(Cig))
-
-table(df$Use.Tob, df$BL.Cig.Day)                          
-```  
-
-```{r}
-#Age
+# relationship between age and birth weight
 age <- df %>%
   mutate(age_cat = ifelse(Age < 20,"15-20", 
                      ifelse(Age < 25,"20-25",
@@ -125,77 +120,38 @@ age %>%
   scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment"))+
   ggtitle("Percent of low birth weight by maternal and treatment")
 ```
+
 Maternal age is an important risk factor for pregnancy-related complications and birth outcomes. When separated by treatment, we can observe a clear increasing trend in giving birth to infants with low birth weight as maternal age increases. 
 
+# Race
 ```{r}
-# Hypertension
-df_htn <- df %>%
-  mutate(Hypertension = as.numeric(Hypertension),
-         Hypertension = ifelse(Hypertension == "2", "1", "0")) 
-
-df_htn<-df_htn%>%group_by(Hypertension, Group)%>%
-  summarize(low_bw = sum(lbw=='1'),
-            normal = sum(lbw=='0'),
-            n=n())%>%
-  mutate(freq = low_bw/(low_bw+normal)*100)
-
-
-df_htn%>%ggplot(aes(x=Hypertension, y=freq, fill = Group))+
-  geom_bar(position="dodge",stat = "identity") +
-  xlab("Hypertension") +
+# relationship between race and birth weight
+race_lbw <- df %>%
+  mutate (number = 1) %>%
+  pivot_longer("Black":"Asian", names_to = "Race", values_to = "Value_R") %>%
+  filter(Value_R == "Yes") %>%
+  group_by(Race, Group) %>%
+  summarize (Number = n(),
+            Low_Birthweight = sum(lbw == "1"),
+            Percentage = sum(lbw == "1")/ sum (lbw == "1"|lbw == "0") * 100)
+race_lbw
+  
+race_lbw %>%
+  ggplot(aes(as.factor(Race), Percentage, fill=as.factor(Group))) +
+  geom_bar(position = "dodge", stat = "identity", width = 0.9) +
+  xlab("Race") +
   ylab("Percent of low birth weight") +
-  geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white") +
-  geom_text(aes(label= paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white") +
-  scale_x_discrete(labels=c("0" = "No (n=784)", "1" = "Yes (n=25)")) +
-  scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment")) +
-  ggtitle("Percent of low birth weight by maternal hypertension status") 
-
-
-###
-ggplot(df,                         
-       aes(x = Group,
-           y = lbw,
-           fill = lbw)) + 
-  geom_bar(stat = "identity",
-           position = "stack") +
-  facet_grid(~Hypertension) +
-    scale_fill_discrete(name = "Birthweight", labels = c("Normal", "Low Birthweight")) +
-  labs(title = "Hypertension", x = "Treatment Group", y = "Percent of low birth weight") +
-  theme(plot.title = element_text(hjust = 0.5)) 
-
-```  
-Maternal hypertension status does associated with low infant birth weight. For group with hypertension, percent of low birthweight is 25% among those treatment group and 44.44% among control group, indicating the treatment do have positive effect. However, since the sample size for the group with hypertension is small, the result should be interpreted in discretion and more data should be used to confirm our conclusion.
-
-```{r}
-#Diabetes
-df %>%
-  group_by(Diabetes) %>%
-  summarize(Yes = sum(Diabetes=='Yes'),
-            No = sum(Diabetes=='No'), 
-            n=n())
-
-dm <- df %>% 
-  filter(!Diabetes %in% "") %>%
-  group_by(Diabetes, Group) %>%
-  summarize(low_bw = sum(lbw=='1'),
-            normal = sum(lbw=='0'), 
-            n=n()) %>%
-  mutate(freq = low_bw/(low_bw+normal)*100)
-
-dm %>% ggplot(aes(Diabetes, freq, fill=Group))+
-  geom_bar(position = "dodge", stat = "identity")+
-  xlab("Diabetes") +
-  ylab("Percent of low birth weight") +
-  geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white") +
-  geom_text(aes(label= paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white") +
-  scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment"))+
-  scale_x_discrete(labels=c("No" = "No (n=786)", "Yes" = "Yes (n=23)")) +
-  ggtitle("Percent of low birth weight by diabetes and treatment")
+   geom_text(aes(label= paste0(round(Percentage,2),"%")), position=position_dodge(width=0.9), vjust=1.5, color="white") +
+  geom_text(aes(label= paste0("n=", Low_Birthweight)), position=position_dodge(width=0.9), vjust=3, color="white") +
+  scale_x_discrete(labels=c("Asian" = "Asian (n=7)", "Black" = "Black (n=364)", "White" = "White (n=231)")) +
+  scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment"))
 ```
-Mother's diabetes status has an obvious impact on infant's birth weight. Mothers with diabetes are more likely to have babies with low birth weight.  
+The overall prevalence of low birth weight is highest among Black population while no Asian mothers have infants with low birth weight. Zero events might be caused by low number of Asian participants (n=7). From the data, we can see that race is associated with presence of low birth weight. 
+51% Black participants and 49% White participants were randomized into the treatment group. However, treatment effect differs between the two groups. Black participants in *control group* had a higher rate of low birth weight while white participants in *treatment group* had a higher rate of low birth weight.
 
-```{r}
 # BMI
+```{r}
+# relationship between BMI and birth weight
 BMI <- df %>%
   mutate(BMI_cat = ifelse(BMI < 18.5,"underweight", 
                      ifelse(BMI < 25,"normal",
@@ -231,83 +187,15 @@ BMI %>%
 ```
 Mother's BMI is reasonably related to infant's birth weight. In this study, underweight mothers are more likely to have babies with low birth weight. However, it's important to notice the samll number of underweight mothers in this study, which might lead to bias. Normal, obese, and overweight mothers do not have a significant difference in their likelihood of giving birth to low-birth-weight babies. 
 
-
+# Smoking
 ```{r}
-#Pre-eclampsia
+# clean data for smoking
+df <- df %>%
+  mutate(Cig = ifelse(Use.Tob == "Yes", BL.Cig.Day, "0")) %>%
+  mutate(Cig = as.numeric(Cig))
 
-df_preeclamp <- df%>%filter(!Pre.eclamp%in%"   ")%>%
-  group_by(Pre.eclamp, Group)%>%
-  summarize(low_bw = sum(lbw=='1'),
-            normal = sum(lbw=='0'),
-            n=n())%>%
-  mutate(freq = low_bw/(low_bw+normal)*100)
-df_preeclamp
-df_preeclamp %>% ggplot(aes(fill=Group, x=Pre.eclamp, y=freq))+
-         geom_bar(position="dodge",stat = "identity")+
-  xlab("Presence of Pre-eclampsia") +
-  ylab("Percent of low birth weight") +
-  geom_text(aes(label=paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white") +
-  geom_text(aes(label=paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white")+
-  scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment"))+
-  ggtitle("Percent of low birth weight by pre-eclampsia and treatment")
-``` 
+table(df$Use.Tob, df$BL.Cig.Day)                          
 
-_Among those with pre-eclampsia, the frequency of low birthweight much higher than those without pre-eclampsia. Therefore, pre-eclampsia may be a helpful predictor of low birthweight. When separated by treatment, there seems to be some changes in percent of low birth weight among control vs. treatment group. However, the direction is differential among those with and without pre-eclampsia._
-
-```{r}
-# relationship between race and birth weight
-race_lbw <- df %>%
-  mutate (number = 1) %>%
-  pivot_longer("Black":"Asian", names_to = "Race", values_to = "Value_R") %>%
-  filter(Value_R == "Yes") %>%
-  group_by(Race, Group) %>%
-  summarize (Number = n(),
-            Low_Birthweight = sum(lbw == "1"),
-            Percentage = sum(lbw == "1")/ sum (lbw == "1"|lbw == "0") * 100)
-race_lbw
-  
-race_lbw %>%
-  ggplot(aes(as.factor(Race), Percentage, fill=as.factor(Group))) +
-  geom_bar(position = "dodge", stat = "identity", width = 0.9) +
-  xlab("Race") +
-  ylab("Percent of low birth weight") +
-   geom_text(aes(label= paste0(round(Percentage,2),"%")), position=position_dodge(width=0.9), vjust=1.5, color="white") +
-  geom_text(aes(label= paste0("n=", Low_Birthweight)), position=position_dodge(width=0.9), vjust=3, color="white") +
-  scale_x_discrete(labels=c("Asian" = "Asian (n=7)", "Black" = "Black (n=364)", "White" = "White (n=231)")) +
-  scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment"))
-```
-The overall prevalence of low birth weight is highest among Black population while no Asian mothers have infants with low birth weight. Zero events might be caused by low number of Asian participants (n=7). From the data, we can see that race is associated with presence of low birth weight. 
-51% Black participants and 49% White participants were randomized into the treatment group. However, treatment effect differs between the two groups. Black participants in *control group* had a higher rate of low birth weight while white participants in *treatment group* had a higher rate of low birth weight.
-
-# relationship between pregnancy loss history and birth weight
-preg_lbw <- df %>%
-  filter(!is.na(Any.live.ptb.sb.sp.ab.in.ab)) %>%
-  group_by(Any.live.ptb.sb.sp.ab.in.ab) %>%
-  summarize (Total_Number = n(),
-             Low_Birthweight = sum(lbw == "1"),
-             Normal_Birthweight = sum(lbw == "0")) %>%
-  pivot_longer("Low_Birthweight":"Normal_Birthweight", names_to = "Type", values_to = "Number")
-
-preg_lbw <- preg_lbw %>%
-  group_by(Any.live.ptb.sb.sp.ab.in.ab) %>%
-  mutate(Percentage = Number/Total_Number)
-
-preg_lbw %>%
-  ggplot(aes(Any.live.ptb.sb.sp.ab.in.ab, Percentage, fill = Type)) +
-  geom_bar(position = "fill", stat = "identity", width=0.5) +
-  scale_y_continuous(labels = scales::percent) +
-  geom_text(aes(label = paste0(round(Percentage,2)*100,"%")), 
-            position = position_stack(vjust = 0.2), size = 4, color="white") +
-  xlab("Pregnancy loss history") +
-  ylab("Percentage") +
-  geom_text(aes(label= paste0("n=", Number)), position = position_stack(vjust = 0.7), size = 4, color="white") +
-  scale_x_discrete(labels=c("Yes" = "Yes (n=327)", "No " = "No (n=276)")) +
-  scale_fill_discrete(name = "Low Birthweight", labels = c("Yes", "No")) +
-  ggtitle("Percent of low birth weight by pregnancy loss history")
-```
-Prevalence of low birth weight is lower among mothers without a previous pregnancy loss history (6.88%) compared to mothers with a previous pregnancy loss history (14.07%).
-
-```{r}
 # relationship between smoking and low birth weight
 smoke_lbw <- df %>%
   mutate(Use.Tob = as.character(Use.Tob)) %>%
@@ -354,8 +242,114 @@ cig_lbw %>%
 ```
 If mothers smoke more than 10 cigarettes per day, the likelihood of low birth weight increases significantly.
 
+# Hypertension
+```{r}
+# relationship between hypertension and birth weight
+df_htn <- df %>%
+  mutate(Hypertension = as.numeric(Hypertension),
+         Hypertension = ifelse(Hypertension == "2", "1", "0")) 
 
-*machine learning models*
+df_htn<-df_htn%>%group_by(Hypertension, Group)%>%
+  summarize(low_bw = sum(lbw=='1'),
+            normal = sum(lbw=='0'),
+            n=n())%>%
+  mutate(freq = low_bw/(low_bw+normal)*100)
+
+
+df_htn%>%ggplot(aes(x=Hypertension, y=freq, fill = Group))+
+  geom_bar(position="dodge",stat = "identity") +
+  xlab("Hypertension") +
+  ylab("Percent of low birth weight") +
+  geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white") +
+  geom_text(aes(label= paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white") +
+  scale_x_discrete(labels=c("0" = "No (n=784)", "1" = "Yes (n=25)")) +
+  scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment")) +
+  ggtitle("Percent of low birth weight by maternal hypertension status")
+```  
+
+# Diabetes
+```{r}
+# relationship between diabetes and birth weight
+df %>%
+  group_by(Diabetes) %>%
+  summarize(Yes = sum(Diabetes=='Yes'),
+            No = sum(Diabetes=='No'), 
+            n=n())
+
+dm <- df %>% 
+  filter(!Diabetes %in% "") %>%
+  group_by(Diabetes, Group) %>%
+  summarize(low_bw = sum(lbw=='1'),
+            normal = sum(lbw=='0'), 
+            n=n()) %>%
+  mutate(freq = low_bw/(low_bw+normal)*100)
+
+dm %>% ggplot(aes(Diabetes, freq, fill=Group))+
+  geom_bar(position = "dodge", stat = "identity")+
+  xlab("Diabetes") +
+  ylab("Percent of low birth weight") +
+  geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white") +
+  geom_text(aes(label= paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white") +
+  scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment"))+
+  scale_x_discrete(labels=c("No" = "No (n=786)", "Yes" = "Yes (n=23)")) +
+  ggtitle("Percent of low birth weight by diabetes and treatment")
+```
+Mother's diabetes status has an obvious impact on infant's birth weight. Mothers with diabetes are more likely to have babies with low birth weight.  
+
+Pre-eclampsia
+```{r}
+# relationship between pre-eclampsia and low-birthweight
+df_preeclamp <- df%>%filter(!Pre.eclamp%in%"   ")%>%
+  group_by(Pre.eclamp, Group)%>%
+  summarize(low_bw = sum(lbw=='1'),
+            normal = sum(lbw=='0'),
+            n=n())%>%
+  mutate(freq = low_bw/(low_bw+normal)*100)
+df_preeclamp
+df_preeclamp %>% ggplot(aes(fill=Group, x=Pre.eclamp, y=freq))+
+         geom_bar(position="dodge",stat = "identity")+
+  xlab("Presence of Pre-eclampsia") +
+  ylab("Percent of low birth weight") +
+  geom_text(aes(label=paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white") +
+  geom_text(aes(label=paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white")+
+  scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment"))+
+  ggtitle("Percent of low birth weight by pre-eclampsia and treatment")
+``` 
+
+_Among those with pre-eclampsia, the frequency of low birthweight much higher than those without pre-eclampsia. Therefore, pre-eclampsia may be a helpful predictor of low birthweight. When separated by treatment, there seems to be some changes in percent of low birth weight among control vs. treatment group. However, the direction is differential among those with and without pre-eclampsia._
+
+# Pregnancy loss history
+```{r}
+# relationship between pregnancy loss history and birth weight
+preg_lbw <- df %>%
+  filter(!is.na(Any.live.ptb.sb.sp.ab.in.ab)) %>%
+  group_by(Any.live.ptb.sb.sp.ab.in.ab) %>%
+  summarize (Total_Number = n(),
+             Low_Birthweight = sum(lbw == "1"),
+             Normal_Birthweight = sum(lbw == "0")) %>%
+  pivot_longer("Low_Birthweight":"Normal_Birthweight", names_to = "Type", values_to = "Number")
+
+preg_lbw <- preg_lbw %>%
+  group_by(Any.live.ptb.sb.sp.ab.in.ab) %>%
+  mutate(Percentage = Number/Total_Number)
+
+preg_lbw %>%
+  ggplot(aes(Any.live.ptb.sb.sp.ab.in.ab, Percentage, fill = Type)) +
+  geom_bar(position = "fill", stat = "identity", width=0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  geom_text(aes(label = paste0(round(Percentage,2)*100,"%")), 
+            position = position_stack(vjust = 0.2), size = 4, color="white") +
+  xlab("Pregnancy loss history") +
+  ylab("Percentage") +
+  geom_text(aes(label= paste0("n=", Number)), position = position_stack(vjust = 0.7), size = 4, color="white") +
+  scale_x_discrete(labels=c("Yes" = "Yes (n=327)", "No " = "No (n=276)")) +
+  scale_fill_discrete(name = "Low Birthweight", labels = c("Yes", "No")) +
+  ggtitle("Percent of low birth weight by pregnancy loss history")
+```
+Prevalence of low birth weight is lower among mothers without a previous pregnancy loss history (6.88%) compared to mothers with a previous pregnancy loss history (14.07%).
+
+
+## Machine learning models
 
 ```{r}
 library(tidyverse)
