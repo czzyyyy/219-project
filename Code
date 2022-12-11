@@ -86,6 +86,44 @@ dm %>% ggplot(aes(Diabetes, freq, fill=as.factor(Diabetes)))+
   geom_text(aes(label= paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white") +
   scale_x_discrete(labels=c("No" = "No (n=786)", "Yes" = "Yes (n=23)"))
 ```
+Mother's diabetes status has an obvious impact on infant's birth weight. Mothers with diabetes are more likely to have babies with low birth weight.  
+
+
+```{r}
+# BMI
+BMI <- df %>%
+  select(BMI, lbw) %>%
+  mutate(BMI_cat = ifelse(BMI < 18.5,"underweight", 
+                     ifelse(BMI < 25,"normal",
+                            ifelse(BMI < 30,"overweight", "obese"))))
+
+BMI %>%
+  group_by(BMI_cat) %>%
+  summarize(underweight = sum(BMI_cat=='underweight'),
+            normal = sum(BMI_cat=='normal'), 
+            overweight = sum(BMI_cat=='overweight'),
+            obese = sum(BMI_cat=='obese'),
+            n=n())
+
+BMI <- BMI %>% 
+  filter(!BMI %in% "") %>%
+  group_by(BMI_cat) %>%
+  summarize(low_bw = sum(lbw=='1'),
+            normal = sum(lbw=='0')) %>%
+  mutate(freq = low_bw/(low_bw+normal)*100)
+
+BMI %>% 
+  filter(!is.na(BMI_cat)) %>%
+  ggplot(aes(BMI_cat, freq, fill=as.factor(BMI_cat)))+
+  geom_bar(stat = "identity", width=0.5)+
+  xlab("BMI") +
+  ylab("Percent of low birth weight") +
+  theme(legend.position="")+
+  geom_text(aes(label= paste0(round(freq,2),"%")),position=position_dodge(width=0.9), vjust=1.5,color="white") +
+  geom_text(aes(label= paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white") +
+  scale_x_discrete(labels=c("underweight" = "Underweight (n=26)", "normal" = "Normal (n=248)", "overweight" = "Overweight (n=228)", "obese" = "Obese (n=235)"))
+```
+Mother's BMI is reasonably related to infant's birth weight. However, in this study, underweight mothers are less likely to have babies with low birth weight, which may be attributed to the samll number of underweight mothers in this study. Normal, obese, and overweight mothers do not have a significant difference in their likelihood of giving birth to low-birth-weight babies. 
 
 ```{r}
 #Between Treatment and Control group
