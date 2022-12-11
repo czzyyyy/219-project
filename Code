@@ -22,11 +22,11 @@ Through reviewing the documentation, we selected several variables of interests 
 ```{r}
 # variables of interest
 df <- opt %>%
-  dplyr::select(PID, Group, Age, Black, White, Asian, Hypertension, Diabetes, BMI, BL.Cig.Day, Any.live.ptb.sb.sp.ab.in.ab, BL.Calc.I,Pre.eclamp, BL.DNA, Use.Tob, Drug.Add, BMI, Diabetes, lbw, Tx.comp., Tx.time, Birthweight)%>%
+  dplyr::select(PID, Group, Age, Black, White, Asian, Hypertension, Diabetes, BMI, BL.Cig.Day, Any.live.ptb.sb.sp.ab.in.ab, BL.Calc.I,Pre.eclamp, BL.DNA, Use.Tob, Drug.Add, Diabetes, lbw, Tx.comp., Tx.time, Birthweight)%>%
   filter(!is.na(Birthweight))
 ```
 
-We only remove columns that contain missing values for birth weight since it's the outcome of interest. Many participants hav missing values for different variables. To avoid losing too much data, we decided to filter out those missing values separately in each data visualization for specific variable.
+We only remove columns that contain missing values for birth weight since it's the outcome of interest. Many participants have missing values for different variables. To avoid losing too much data, we decided to filter out those missing values separately in each data visualization for specific variable.
 
 ```{r}
 # A variable that combines information from 'Group' and 'Tx.Comp.'
@@ -278,7 +278,7 @@ ggplot(df,
   labs(title = "Hypertension", x = "Treatment Group", y = "Percent of low birth weight") +
   theme(plot.title = element_text(hjust = 0.5))   
 ```
-Maternal hypertension status does have impact on  infant birth weight. For group with hypertension, percent of low birthweight is 25% among those treatment group and 44.44% among control group, indicating the treatment do have positive effect. However, since the sample size for the group with hypertension is small, the result should be interpreted in discretion and more data should be used to confirm our conclusion.
+Maternal hypertension status does have impact on infant birth weight. For group with hypertension, percent of low birthweight is 25% among those treatment group and 44.44% among control group, indicating the treatment do have positive effect. However, since the sample size for the group with hypertension is small, the result should be interpreted in discretion and more data should be used to confirm our conclusion.
 
 
 ##Diabetes
@@ -308,7 +308,7 @@ dm %>% ggplot(aes(Diabetes, freq, fill=Group))+
   scale_x_discrete(labels=c("No" = "No (n=786)", "Yes" = "Yes (n=23)")) +
   ggtitle("Percent of low birth weight by diabetes and treatment")
 ```
-Mother's diabetes status has an obvious impact on infant's birth weight. Mothers with diabetes are more likely to have babies with low birth weight.  
+Mother's diabetes status has an obvious impact on infant's birth weight. Mothers with diabetes are more likely to deliver babies with low birth weight.  
 
 ##Pre-eclampsia
 ```{r}
@@ -330,7 +330,7 @@ df_preeclamp %>% ggplot(aes(fill=Group, x=Pre.eclamp, y=freq))+
   ggtitle("Percent of low birth weight by pre-eclampsia and treatment")
 ``` 
 
-_Among those with pre-eclampsia, the frequency of low birthweight much higher than those without pre-eclampsia. Therefore, pre-eclampsia may be a helpful predictor of low birthweight. When separated by treatment, there seems to be some changes in percent of low birth weight among control vs. treatment group. However, the direction is differential among those with and without pre-eclampsia._
+Among those with pre-eclampsia, the frequency of low birthweight much higher than those without pre-eclampsia. Therefore, pre-eclampsia may be a helpful predictor of low birthweight. When separated by treatment, there seems to be some changes in percent of low birth weight among control vs. treatment group. However, the direction is differential among those with and without pre-eclampsia._
 
 ##Pregnancy loss history
 ```{r}
@@ -374,6 +374,7 @@ library(pROC)
 ```
 
 As the prevalence of low birthweight in the dataset is relatively low, we stratify the training set and testing set using `stratified` function to make sure each set contains same percent of individuals from each group.
+
 ```{r}
 # choose training set
 set.seed(1)
