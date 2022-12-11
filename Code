@@ -148,8 +148,23 @@ df_htn%>%ggplot(aes(x=Hypertension, y=freq, fill = Group))+
   geom_text(aes(label= paste0("n=",low_bw)),position=position_dodge(width=0.9), vjust=3,color="white") +
   scale_x_discrete(labels=c("0" = "No (n=784)", "1" = "Yes (n=25)")) +
   scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment")) +
-  ggtitle("Percent of low birth weight by maternal hypertension status")
+  ggtitle("Percent of low birth weight by maternal hypertension status") 
+
+
+###
+ggplot(df,                         
+       aes(x = Group,
+           y = lbw,
+           fill = lbw)) + 
+  geom_bar(stat = "identity",
+           position = "stack") +
+  facet_grid(~Hypertension) +
+    scale_fill_discrete(name = "Birthweight", labels = c("Normal", "Low Birthweight")) +
+  labs(title = "Hypertension", x = "Treatment Group", y = "Percent of low birth weight") +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
 ```  
+Maternal hypertension status does associated with low infant birth weight. For group with hypertension, percent of low birthweight is 25% among those treatment group and 44.44% among control group, indicating the treatment do have positive effect. However, since the sample size for the group with hypertension is small, the result should be interpreted in discretion and more data should be used to confirm our conclusion.
 
 ```{r}
 #Diabetes
