@@ -461,3 +461,13 @@ auc(roc_glm)
 auc(roc_knn5)
 auc(roc_nb)
 ```
+
+4. The company stakeholders want to know what decision they should make on their stated goal/question. Based on your analysis, make recommendations for a non-technical audience. 
+
+From our analysis, we found that maternal periodontal disease treatment does not have a strong impact on the risk of low birth weight. The risk of low birth weight reduces by a small amount for mothers who received periodontal disease therapy compared to mothers who received control. The risk was lowest among mothers who completed the periodontal therapy. For mothers who only completed some extent of the treatment, there were no reduction of risk.
+
+We then want to see if other factors may modify the effect maternal periodontal disease treatment have on the risk of low birth weight. For example, is there evidence of a particular population more susceptible to the risk of low birth weight? Does the association between maternal periodontal disease treatment and the reduction in risk of low birth weight become more significant in particular population with certain characteristics?
+
+We found that periodontal treatment modestly reduces the risk of low birth weight among mothers <30 years old, with normal, obese, and overweight BMI, Black population, non-smoking status, or no pre-eclampsia. The small reduction of low birth weight by the treatment is regardless of diabetes and hypertension status. However,treatment may further increase the risk of low birth weight in mothers with age >30 , White population, underweight, or with presence of pre-eclampsia.
+
+Therefore, we could not find significant evidence for the large reduction of risk of low birth weight after use of maternal periodontal disease treatment despite overall lowering the risk slightly. Although it may reduce the risk by a moderate amount in certain population, the effect is opposite in some other population.
