@@ -16,7 +16,7 @@ opt <- opt %>%
 head(opt$lbw)
 ```
 
-## Predictors Selection
+## Question 2: Predictors Selection
 Through reviewing the documentation, we selected several variables of interests to explore individually to see if they are associated with low birth weight.(Cite literature?)
 
 ```{r}
@@ -144,7 +144,8 @@ race_lbw %>%
    geom_text(aes(label= paste0(round(Percentage,2),"%")), position=position_dodge(width=0.9), vjust=1.5, color="white") +
   geom_text(aes(label= paste0("n=", Low_Birthweight)), position=position_dodge(width=0.9), vjust=3, color="white") +
   scale_x_discrete(labels=c("Asian" = "Asian (n=7)", "Black" = "Black (n=364)", "White" = "White (n=231)")) +
-  scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment"))
+  scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment")) +
+  ggtitle("Percent of low birth weight by Race and treatment")
 ```
 The overall prevalence of low birth weight is highest among Black population while no Asian mothers have infants with low birth weight. Zero events might be caused by low number of Asian participants (n=7). From the data, we can see that race is associated with presence of low birth weight. 
 51% Black participants and 49% White participants were randomized into the treatment group. However, treatment effect differs between the two groups. Black participants in *control group* had a higher rate of low birth weight while white participants in *treatment group* had a higher rate of low birth weight.
@@ -241,6 +242,31 @@ cig_lbw %>%
   ggtitle("Percent of low birth weight by number of cigarettes oer day (> 10 vs ≤ 10)")
 ```
 If mothers smoke more than 10 cigarettes per day, the likelihood of low birth weight increases significantly.
+
+### Education
+
+```{r}
+edu_lbw <- df %>%
+  group_by(Education, Group) %>%
+  summarize (Number = n(),
+            Low_Birthweight = sum(lbw == "1"),
+            Percentage = sum(lbw == "1")/ sum (lbw == "1"|lbw == "0") * 100)
+edu_lbw
+  
+edu_lbw %>%
+  mutate(Education = fct_relevel(Education, "LT 8 yrs ", "8-12 yrs ", "MT 12 yrs" )) %>% 
+  ggplot(aes(Education, Percentage, fill=as.factor(Group))) +
+  geom_bar(position = "dodge", stat = "identity", width = 0.9) +
+  xlab("Education Level") +
+  ylab("Percent of low birth weight") +
+  geom_text(aes(label= paste0(round(Percentage,2),"%")), position=position_dodge(width=0.9), vjust=1.5, color="white") +
+  geom_text(aes(label= paste0("n=", Low_Birthweight)), position=position_dodge(width=0.9), vjust=3, color="white") +
+  scale_x_discrete(labels=c("LT 8 yrs " = "< 8 yrs (n=153)", "8-12 yrs " = "8-12 yrs (n=470)", "MT 12 yrs" = "> 12 yrs (n=186)")) +
+  scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment")) +
+  ggtitle("Percent of low birth weight by education level and treatment")
+```
+
+Overall, the likelihood of low birth weight has no association with education level. However, treatment was more effective in mothers with lower education level.
 
 ### Hypertension
 ```{r}
@@ -362,7 +388,7 @@ preg_lbw %>%
 Prevalence of low birth weight is lower among mothers without a previous pregnancy loss history (6.88%) compared to mothers with a previous pregnancy loss history (14.07%).
 
 
-## Machine learning models
+## Question 3: Machine learning models
 
 ```{r}
 library(tidyverse)
@@ -387,9 +413,12 @@ dim(train_set)
 dim(test_set)
 ```
 
-##Logistic regression model
+In the three models below, we used the following predictors: age, race, education level, smoking status, number of cigarattes per day, diabetes, hypertension, pre-eclampsia and treatment selection. Most of the predictors are justified above. Gestiational age and preterm delivery is a well-known risk factor for low birth weight.
+
+### Logistic regression model
 ```{r}
-glm_fit <- train_set %>% glm(as.factor(lbw) ~ Pre.eclamp + Tx+Hypertension+Diabetes+Black+White+Asian+Use.Tob+Cig+Age, data=., family = "binomial")
+glm_fit <- train_set %>% 
+   glm(as.factor(lbw) ~ Pre.eclamp + Tx+ Hypertension+ Diabetes+ Black+ White+ Asian+ Use.Tob+ Cig+ Age+ Education+ GA.at.outcome+ Preg.ended...37.wk, data=., family = "binomial")
 p_hat_logit <- predict(glm_fit, newdata = test_set, type="response")
 y_hat_logit <- ifelse(p_hat_logit > 0.25, "1", "0")
 test_set<-test_set%>%mutate(lbw=as.factor(lbw))
@@ -398,10 +427,11 @@ confusionMatrix(data = as.factor(y_hat_logit),
 ```
 The prevalence of low birthweight is only xxx. The accuracy is xxx while the balanced accuracy is only xxx. The sensitivity (xxx) and the specificity (xxx) are highly imbalanced.      
        
-##Knn model with k = 5
+### Knn model with k = 5
 ```{r}
 #fit model
-knn_fit_5 <- knn3(lbw ~ Pre.eclamp + Tx+Hypertension+Diabetes+Black+White+Asian+Use.Tob+Cig+Age, data = train_set, k = 5)
+knn_fit_5 <- train_set %>%
+   knn3(lbw ~ Pre.eclamp + Tx+ Hypertension+ Diabetes+ Black+ White+ Asian+ Use.Tob+ Cig+ Age+ Education +GA.at.outcome+ Preg.ended...37.wk, data = ., k = 5)
 
 #prediction
 p_hat_knn5 <- predict(knn_fit_5, newdata = test_set)[,2]
@@ -415,10 +445,10 @@ confusionMatrix(data = as.factor(y_hat_knn5),
 
 ```
 
-#NB model
+### NB model
 ```{r}
 nb_fit <- train_set %>% 
-  naiveBayes(as.factor(lbw) ~ Pre.eclamp + Tx+Hypertension+Diabetes+Black+White+Asian+Use.Tob+Cig+Age, data = .)
+  naiveBayes(as.factor(lbw) ~ Pre.eclamp + Tx+ Hypertension+ Diabetes+ Black+ White+ Asian+ Use.Tob+ Cig+ Age+ Education +GA.at.outcome+ Preg.ended...37.wk, data = .)
 
 p_hat_nb <- predict(nb_fit, test_set, type = "raw")[,2]
 y_hat_nb <- ifelse(p_hat_nb > 0.25, "1", "0") 
@@ -461,9 +491,9 @@ auc(roc_knn5)
 auc(roc_nb)
 ```
 
-Larger AUC suggests greater performance of the model.
+Larger AUC suggests greater performance of the model. Knn model with k = 5 performances significantly bettwe with both a higher sensitivity and a higher specificity.
 
-## Treatment Recommendation
+## Question 4: Treatment Recommendation
 From our analysis, we found that maternal periodontal disease treatment does not have a strong impact on the risk of low birth weight. The risk of low birth weight reduces by a small amount for mothers who received periodontal disease therapy compared to mothers who received control. The risk was lowest among mothers who completed the periodontal therapy. For mothers who only completed some extent of the treatment, there were no reduction of risk.
 
 We then want to see if other factors may modify the effect maternal periodontal disease treatment have on the risk of low birth weight. For example, is there evidence of a particular population more susceptible to the risk of low birth weight? Does the association between maternal periodontal disease treatment and the reduction in risk of low birth weight become more significant in particular population with certain characteristics?
