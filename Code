@@ -416,7 +416,7 @@ set.seed(1)
 x <- stratified(df, "lbw", 0.5, keep.rownames = TRUE)
 train_set <- x %>% dplyr::select(-rn)
 train_index <- as.numeric(x$rn)
-test_set <- x[-train_index,]
+test_set <- df[-train_index,]
 
 dim(train_set)
 dim(test_set)
