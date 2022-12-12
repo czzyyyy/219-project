@@ -17,7 +17,7 @@ head(opt$lbw)
 ```
 
 ## Question 2: Predictors Selection
-Through reviewing the documentation, we selected several variables of interests to explore individually to see if they are associated with low birth weight.(Cite literature?)
+Through reviewing the documentation, we selected several variables of interests to explore individually to see if they are associated with low birth weight. Some factors such as maternal medical risks before gestation and during pregnancy, and socioeconomic factors are known from previous scientific publications (Bernabe JV et al. 2004).
 
 ```{r}
 # variables of interest
@@ -504,4 +504,7 @@ Therefore, we could not find significant evidence for the large reduction of ris
 
 
 ## Question 5: Additional information
-  Our prediction model could be improved if more information are collected. For example, mother’s genetic information can be collected. Since preterm birth is an important cause for low birth weight, it would be useful to know genomic variants that are significantly associated with preterm birth or pregnancy-related traits. We could construct genetic risk scores for individuals and estimate their risk of preterm birth. In addition, socioeconomic factors not included in the data set, like occupation and income, may also be useful for better prediction of low birth weight. It may also be helpful to look at different types of periodontal treatments and their separate effects on the risk of low birth weight. 
+  Our prediction model could be improved if more information are collected. For example, mother’s genetic information can be collected. Since preterm birth is an important cause for low birth weight, it would be useful to know genomic variants that are significantly associated with preterm birth or pregnancy-related traits. We could construct genetic risk scores for individuals and estimate their risk of preterm birth. In addition, socioeconomic factors not included in the data set, like occupation and income, may also be useful for better prediction of low birth weight. It may also be helpful to look at different types of periodontal treatments and their separate effects on the risk of low birth weight.
+  
+ Reference:
+ Valero De Bernabé J, Soriano T, Albaladejo R, et al. Risk factors for low birth weight: a review. European Journal of Obstetrics & Gynecology and Reproductive Biology. 2004;116(1):3-15. doi:10.1016/J.EJOGRB.2004.03.007
