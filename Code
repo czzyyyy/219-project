@@ -22,7 +22,7 @@ Through reviewing the documentation, we selected several variables of interests 
 ```{r}
 # variables of interest
 df <- opt %>%
-  dplyr::select(PID, Group, Age, Black, White, Asian, Hypertension, Diabetes, BMI, BL.Cig.Day, Any.live.ptb.sb.sp.ab.in.ab, BL.Calc.I,Pre.eclamp, BL.DNA, Use.Tob, Drug.Add, Diabetes, lbw, Tx.comp., Tx.time, Birthweight)%>%
+  dplyr::select(PID, Group, Age, Black, White, Asian, Hypertension, Diabetes, BMI, BL.Cig.Day, Any.live.ptb.sb.sp.ab.in.ab, BL.Calc.I,Pre.eclamp, BL.DNA, Use.Tob, Drug.Add, Diabetes, lbw, Tx.comp., Tx.time, Birthweight, GA.at.outcome, Preg.ended...37.wk)%>%
   filter(!is.na(Birthweight))
 ```
 
