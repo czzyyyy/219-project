@@ -57,6 +57,7 @@ df_group%>%ggplot(aes(x=Group, y=freq, fill=as.factor(Group)))+
   scale_x_discrete(labels=c("C" = "Control(N=403)", "T" = "Periodontal Treatment(N=406)"))+
   ggtitle("Percent of low birth weight by treatment group")
 ```
+
 There are only a slight difference between percentage of low birthweight in treatment (9.85%) vs. control (10.67%) group.
 
 ### Treatment Completion
@@ -147,7 +148,9 @@ race_lbw %>%
   scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment")) +
   ggtitle("Percent of low birth weight by Race and treatment")
 ```
+
 The overall prevalence of low birth weight is highest among Black population while no Asian mothers have infants with low birth weight. Zero events might be caused by low number of Asian participants (n=7). From the data, we can see that race is associated with presence of low birth weight. 
+
 51% Black participants and 49% White participants were randomized into the treatment group. However, treatment effect differs between the two groups. Black participants in *control group* had a higher rate of low birth weight while white participants in *treatment group* had a higher rate of low birth weight.
 
 ### BMI
@@ -186,6 +189,7 @@ BMI %>%
   scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment"))+
   ggtitle("Percent of low birth weight by BMI and treatment")
 ```
+
 Mother's BMI is reasonably related to infant's birth weight. In this study, underweight mothers are more likely to have babies with low birth weight. However, it's important to notice the samll number of underweight mothers in this study, which might lead to bias. Normal, obese, and overweight mothers do not have a significant difference in their likelihood of giving birth to low-birth-weight babies. 
 
 ### Smoking
@@ -218,7 +222,8 @@ smoke_lbw %>%
   scale_fill_discrete(name = "Treatment Group", labels = c("Control", "Periodontal Treatment")) +
   ggtitle("Percent of low birth weight by smokig status and treatment")
 ```
-Smoking is a well-known risk factor for low birth weight and oral health problems. In this study, the prevalence of smoking is relatively low (12%). The result from the data is consistent with the hypothesis. Compared to mother who didn't smoke, mothers with a smoking history had an increased risk of having babies with a low birth weight. The direction of the effect of treatment is also different between smokers and non-smokers.
+
+Smoking is a well-known risk factor for low birth weight and oral health problems. In this study, the prevalence of smoking is relatively low (12%). The result from the data is consistent with the hypothesis. Compared to mothers who didn't smoke, mothers with a smoking history had an increased risk of having babies with a low birth weight. The direction of the effect of treatment is also different between smokers and non-smokers.
 
 ```{r}
 # relationship between number of cigarettes and low birth weight 
@@ -241,6 +246,7 @@ cig_lbw %>%
   scale_x_discrete(labels=c("TRUE" = "Yes (n=16)", "FALSE" = "No (n=76)")) +
   ggtitle("Percent of low birth weight by number of cigarettes oer day (> 10 vs ≤ 10)")
 ```
+
 If mothers smoke more than 10 cigarettes per day, the likelihood of low birth weight increases significantly.
 
 ### Education
@@ -304,6 +310,7 @@ ggplot(df,
   labs(title = "Hypertension", x = "Treatment Group", y = "Percent of low birth weight") +
   theme(plot.title = element_text(hjust = 0.5))   
 ```
+
 Maternal hypertension status does have impact on infant birth weight. For group with hypertension, percent of low birthweight is 25% among those treatment group and 44.44% among control group, indicating the treatment do have positive effect. However, since the sample size for the group with hypertension is small, the result should be interpreted in discretion and more data should be used to confirm our conclusion.
 
 ### Diabetes
@@ -333,6 +340,7 @@ dm %>% ggplot(aes(Diabetes, freq, fill=Group))+
   scale_x_discrete(labels=c("No" = "No (n=786)", "Yes" = "Yes (n=23)")) +
   ggtitle("Percent of low birth weight by diabetes and treatment")
 ```
+
 Mother's diabetes status has an obvious impact on infant's birth weight. Mothers with diabetes are more likely to deliver babies with low birth weight.  
 
 ### Pre-eclampsia
@@ -385,6 +393,7 @@ preg_lbw %>%
   scale_fill_discrete(name = "Low Birthweight", labels = c("Yes", "No")) +
   ggtitle("Percent of low birth weight by pregnancy loss history")
 ```
+
 Prevalence of low birth weight is lower among mothers without a previous pregnancy loss history (6.88%) compared to mothers with a previous pregnancy loss history (14.07%).
 
 
@@ -413,12 +422,14 @@ dim(train_set)
 dim(test_set)
 ```
 
-In the three models below, we used the following predictors: age, race, education level, smoking status, number of cigarattes per day, diabetes, hypertension, pre-eclampsia and treatment selection. Most of the predictors are justified above. Gestiational age and preterm delivery is a well-known risk factor for low birth weight.
+In the three models below, we used the following predictors: age, race, smoking status, number of cigarattes per day, diabetes, hypertension, pre-eclampsia, treatment selection, gestiational age and preterm delivery. Most of the predictors are justified above. Gestiational age and preterm delivery are well-known risk factors for low birth weight.
+
+Pregancy loss history and BMI are not included in the models, for they have lots of missing values. Although logistic regression and naive bayes models can deal with missing values, Knn model can't work well with the presence of misisng value. To keep consistency, we drop those two variables. 
 
 ### Logistic regression model
 ```{r}
 glm_fit <- train_set %>% 
-   glm(as.factor(lbw) ~ Pre.eclamp + Tx+ Hypertension+ Diabetes+ Black+ White+ Asian+ Use.Tob+ Cig+ Age+ Education+ GA.at.outcome+ Preg.ended...37.wk, data=., family = "binomial")
+   glm(as.factor(lbw) ~ Pre.eclamp + Tx+ Hypertension+ Diabetes+ Black+ White+ Asian+ Use.Tob+ Cig+ Age+ GA.at.outcome+ Preg.ended...37.wk, data=., family = "binomial")
 p_hat_logit <- predict(glm_fit, newdata = test_set, type="response")
 y_hat_logit <- ifelse(p_hat_logit > 0.25, "1", "0")
 test_set<-test_set%>%mutate(lbw=as.factor(lbw))
@@ -431,7 +442,7 @@ The prevalence of low birthweight is only xxx. The accuracy is xxx while the bal
 ```{r}
 #fit model
 knn_fit_5 <- train_set %>%
-   knn3(lbw ~ Pre.eclamp + Tx+ Hypertension+ Diabetes+ Black+ White+ Asian+ Use.Tob+ Cig+ Age+ Education +GA.at.outcome+ Preg.ended...37.wk, data = ., k = 5)
+   knn3(lbw ~ Pre.eclamp + Tx+ Hypertension+ Diabetes+ Black+ White+ Asian+ Use.Tob+ Cig+ Age +GA.at.outcome+ Preg.ended...37.wk, data = ., k = 5)
 
 #prediction
 p_hat_knn5 <- predict(knn_fit_5, newdata = test_set)[,2]
@@ -448,7 +459,7 @@ confusionMatrix(data = as.factor(y_hat_knn5),
 ### NB model
 ```{r}
 nb_fit <- train_set %>% 
-  naiveBayes(as.factor(lbw) ~ Pre.eclamp + Tx+ Hypertension+ Diabetes+ Black+ White+ Asian+ Use.Tob+ Cig+ Age+ Education +GA.at.outcome+ Preg.ended...37.wk, data = .)
+  naiveBayes(as.factor(lbw) ~ Pre.eclamp + Tx+ Hypertension+ Diabetes+ Black+ White+ Asian+ Use.Tob+ Cig+ Age +GA.at.outcome+ Preg.ended...37.wk, data = .)
 
 p_hat_nb <- predict(nb_fit, test_set, type = "raw")[,2]
 y_hat_nb <- ifelse(p_hat_nb > 0.25, "1", "0") 
